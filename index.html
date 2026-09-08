@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <meta name="format-detection" content="telephone=no" />
+
+        <!-- Meta / OG tags - config.js 값으로 script에서 동적 설정 -->
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="백두한 ♥ 박지현 결혼합니다" />
+        <meta
+            property="og:description"
+            content="2026년 11월 21일, 소중한 분들을 초대합니다."
+        />
+        <meta property="og:image" content="images/og/1.jpg" />
+        <meta property="og:image:width" content="4000" />
+        <meta property="og:image:height" content="6000" />
+        <meta property="og:image:alt" content="백두한과 박지현의 결혼식 사진" />
+        <meta
+            name="description"
+            content="2026년 11월 21일, 소중한 분들을 초대합니다."
+        />
+
+        <title>Wedding Invitation</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+            rel="stylesheet"
+        />
+
+        <link rel="stylesheet" href="styles.css" />
+        <script src="config.js"></script>
+    </head>
+    <body>
+        <!-- ─── Curtain (Simple Overlay) ─── -->
+        <div id="curtain" class="curtain">
+            <div class="curtain__content">
+                <p class="curtain__names" id="curtainNames"></p>
+                <button class="curtain__btn" id="curtainBtn">열기</button>
+            </div>
+        </div>
+
+        <!-- ─── Falling Petals Canvas ─── -->
+        <canvas id="petals-canvas" aria-hidden="true"></canvas>
+
+        <!-- ─── Toast Notification ─── -->
+        <div id="toast" class="toast" aria-live="polite"></div>
+
+        <!-- ─── Background Music ─── -->
+        <audio id="bgmAudio" loop preload="metadata"></audio>
+        <button
+            class="bgm-toggle"
+            id="bgmToggle"
+            type="button"
+            aria-label="배경음악 켜기"
+            aria-pressed="false"
+        >
+            <span aria-hidden="true">♪</span>
+        </button>
+
+        <!-- ─── Photo Viewer Modal ─── -->
+        <div
+            id="photoModal"
+            class="photo-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="사진 보기"
+        >
+            <button
+                class="photo-modal__close"
+                id="modalClose"
+                aria-label="닫기"
+            >
+                <svg
+                    class="photo-modal__close-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+            </button>
+            <button
+                class="photo-modal__nav photo-modal__nav--prev"
+                id="modalPrev"
+                aria-label="이전 사진"
+            >
+                <svg
+                    class="photo-modal__nav-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M15 18L9 12l6-6" />
+                </svg>
+            </button>
+            <button
+                class="photo-modal__nav photo-modal__nav--next"
+                id="modalNext"
+                aria-label="다음 사진"
+            >
+                <svg
+                    class="photo-modal__nav-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M9 18l6-6-6-6" />
+                </svg>
+            </button>
+            <div class="photo-modal__container" id="modalContainer">
+                <img
+                    class="photo-modal__img"
+                    id="modalImg"
+                    src=""
+                    alt="사진"
+                    draggable="false"
+                />
+            </div>
+            <div class="photo-modal__counter" id="modalCounter"></div>
+        </div>
+
+        <!-- ─── Main Content ─── -->
+        <main id="mainContent" class="main-content">
+            <!-- Hero Section -->
+            <section class="section hero" id="hero">
+                <div class="hero__photo-wrap">
+                    <img
+                        class="hero__photo"
+                        id="heroPhoto"
+                        src=""
+                        alt="웨딩 사진"
+                        loading="eager"
+                    />
+                </div>
+                <div class="hero__content">
+                    <h1
+                        class="hero__names animate-item"
+                        data-animate="fade-up"
+                        id="heroNames"
+                    ></h1>
+                    <p
+                        class="hero__date animate-item"
+                        data-animate="fade-up"
+                        id="heroDate"
+                    ></p>
+                    <p
+                        class="hero__venue animate-item"
+                        data-animate="fade-up"
+                        id="heroVenue"
+                    ></p>
+                    <p
+                        class="hero__hall animate-item"
+                        data-animate="fade-up"
+                        id="heroHall"
+                    ></p>
+                </div>
+
+                <!-- Countdown -->
+                <div
+                    class="countdown animate-item"
+                    data-animate="fade-up"
+                    id="countdown"
+                >
+                    <p class="countdown__label" id="countdownLabel"></p>
+                    <div class="countdown__timer">
+                        <div class="countdown__item">
+                            <span class="countdown__number" id="countDays"
+                                >0</span
+                            >
+                            <span class="countdown__unit">일</span>
+                        </div>
+                        <div class="countdown__sep">:</div>
+                        <div class="countdown__item">
+                            <span class="countdown__number" id="countHours"
+                                >0</span
+                            >
+                            <span class="countdown__unit">시간</span>
+                        </div>
+                        <div class="countdown__sep">:</div>
+                        <div class="countdown__item">
+                            <span class="countdown__number" id="countMinutes"
+                                >0</span
+                            >
+                            <span class="countdown__unit">분</span>
+                        </div>
+                        <div class="countdown__sep">:</div>
+                        <div class="countdown__item">
+                            <span class="countdown__number" id="countSeconds"
+                                >0</span
+                            >
+                            <span class="countdown__unit">초</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Greeting Section -->
+            <section class="section greeting" id="greeting">
+                <div class="section__inner">
+                    <h2
+                        class="section__title animate-item"
+                        data-animate="fade-up"
+                        id="greetingTitle"
+                    ></h2>
+                    <div
+                        class="section__divider animate-item"
+                        data-animate="fade-in"
+                    ></div>
+                    <p
+                        class="greeting__text animate-item"
+                        data-animate="fade-up"
+                        id="greetingContent"
+                    ></p>
+                    <div
+                        class="greeting__parents animate-item"
+                        data-animate="fade-up"
+                        id="greetingParents"
+                    ></div>
+                </div>
+            </section>
+
+            <!-- Story Section -->
+            <section class="section story" id="story" style="padding: 0">
+                <div class="section__inner" style="padding: 0">
+                    <div class="story__photos" id="storyPhotos"></div>
+                </div>
+            </section>
+
+            <!-- Calendar Actions -->
+            <section class="section calendar-section" id="calendarSection">
+                <div class="section__inner">
+                    <h2
+                        class="section__title animate-item"
+                        data-animate="fade-up"
+                    >
+                        예식 일시
+                    </h2>
+                    <div
+                        class="section__divider animate-item"
+                        data-animate="fade-in"
+                    ></div>
+                    <div
+                        class="calendar animate-item"
+                        data-animate="fade-up"
+                        id="calendarGrid"
+                    ></div>
+                    <div
+                        class="calendar-actions animate-item"
+                        data-animate="fade-up"
+                    >
+                        <a
+                            class="btn btn--outline"
+                            id="googleCalBtn"
+                            href="#"
+                            target="_blank"
+                            rel="noopener"
+                            >Google 캘린더</a
+                        >
+                        <button class="btn btn--outline" id="icsDownloadBtn">
+                            Apple 캘린더
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gallery Section -->
+            <section class="section gallery" id="gallery">
+                <div class="section__inner">
+                    <h2
+                        class="section__title animate-item"
+                        data-animate="fade-up"
+                    >
+                        갤러리
+                    </h2>
+                    <div
+                        class="section__divider animate-item"
+                        data-animate="fade-in"
+                    ></div>
+                    <div class="gallery__grid" id="galleryGrid"></div>
+                </div>
+            </section>
+
+            <!-- Location Section -->
+            <section class="section location" id="location">
+                <div class="section__inner">
+                    <h2
+                        class="section__title animate-item"
+                        data-animate="fade-up"
+                    >
+                        오시는 길
+                    </h2>
+                    <div
+                        class="section__divider animate-item"
+                        data-animate="fade-in"
+                    ></div>
+                    <div
+                        class="location__info animate-item"
+                        data-animate="fade-up"
+                    >
+                        <p class="location__venue" id="locationVenue"></p>
+                        <p class="location__hall" id="locationHall"></p>
+                        <p class="location__address" id="locationAddress"></p>
+                        <p class="location__tel" id="locationTel"></p>
+                    </div>
+                    <button
+                        class="btn btn--text location__copy animate-item"
+                        data-animate="fade-up"
+                        id="copyAddressBtn"
+                    >
+                        주소 복사
+                    </button>
+                    <div
+                        class="location__map animate-item"
+                        data-animate="fade-in"
+                    >
+                        <img
+                            class="location__map-img"
+                            id="locationMapImg"
+                            src=""
+                            alt="약도"
+                            loading="lazy"
+                        />
+                        <dl class="location__directions" aria-label="교통 안내">
+                            <div class="location__direction">
+                                <dt>지하철 이용 시</dt>
+                                <dd>
+                                    1, 2호선 신도림역 2, 3번 출구<br />
+                                    (테크노마트 판매동 지하 1층과 직접 연결)
+                                </dd>
+                            </div>
+                            <div class="location__direction">
+                                <dt>버스 이용 시</dt>
+                                <dd>
+                                    5619, 6411, 6511, 6611, 6650, 6651, 5615,
+                                    5714, 6512, 6513, 6516, 6637, 6640, 160,
+                                    503, 600, 670, 662, 301, 320, 510, 10, 11-1,
+                                    11-2, 83, 88
+                                </dd>
+                            </div>
+                            <div class="location__direction">
+                                <dt>자가용 이용 시</dt>
+                                <dd>
+                                    네비게이션 주소검색<br />
+                                    <span class="location__address-label"
+                                        >신주소</span
+                                    >
+                                    서울시 구로구 새말로 97,&nbsp;7F<br />
+                                    <span class="location__address-label"
+                                        >구주소</span
+                                    >
+                                    서울시 구로구 구로동 3-25
+                                    신도림테크노마트&nbsp;7층
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div
+                        class="location__links animate-item"
+                        data-animate="fade-up"
+                    >
+                        <a
+                            class="btn btn--outline"
+                            id="kakaoMapBtn"
+                            href="#"
+                            target="_blank"
+                            rel="noopener"
+                            >카카오맵</a
+                        >
+                        <a
+                            class="btn btn--outline"
+                            id="naverMapBtn"
+                            href="#"
+                            target="_blank"
+                            rel="noopener"
+                            >네이버지도</a
+                        >
+                    </div>
+                </div>
+            </section>
+
+            <!-- Account Section (축의금) -->
+            <section class="section account" id="account">
+                <div class="section__inner">
+                    <h2
+                        class="section__title animate-item"
+                        data-animate="fade-up"
+                    >
+                        마음 전하실 곳
+                    </h2>
+                    <div
+                        class="section__divider animate-item"
+                        data-animate="fade-in"
+                    ></div>
+                    <p
+                        class="account__desc animate-item"
+                        data-animate="fade-up"
+                    >
+                        축하해주시는 따뜻한 마음, <br />
+                        감사히 간직하겠습니다.
+                    </p>
+
+                    <!-- Groom Accounts -->
+                    <div class="accordion animate-item" data-animate="fade-up">
+                        <button
+                            class="accordion__trigger"
+                            id="groomAccordion"
+                            aria-expanded="false"
+                        >
+                            <span>신랑측 계좌번호</span>
+                            <svg
+                                class="accordion__arrow"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div class="accordion__panel" id="groomAccordionPanel">
+                            <div
+                                class="accordion__panel-inner"
+                                id="groomAccountList"
+                            ></div>
+                        </div>
+                    </div>
+
+                    <!-- Bride Accounts -->
+                    <div class="accordion animate-item" data-animate="fade-up">
+                        <button
+                            class="accordion__trigger"
+                            id="brideAccordion"
+                            aria-expanded="false"
+                        >
+                            <span>신부측 계좌번호</span>
+                            <svg
+                                class="accordion__arrow"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path d="M6 9l6 6 6-6" />
+                            </svg>
+                        </button>
+                        <div class="accordion__panel" id="brideAccordionPanel">
+                            <div
+                                class="accordion__panel-inner"
+                                id="brideAccountList"
+                            ></div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer">
+                <p class="footer__text" id="footerText"></p>
+            </footer>
+        </main>
+
+        <!-- ─── Quick Section Navigation ─── -->
+        <nav class="quick-nav" id="quickNav" aria-label="빠른 이동">
+            <button
+                class="quick-nav__item is-active"
+                type="button"
+                data-nav-target="hero"
+                aria-label="홈"
+                aria-current="true"
+            >
+                <svg
+                    class="quick-nav__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M3 11l9-7 9 7"></path>
+                    <path d="M5 10v10h14V10"></path>
+                </svg>
+                <span class="quick-nav__label">홈</span>
+            </button>
+            <button
+                class="quick-nav__item"
+                type="button"
+                data-nav-target="gallery"
+                aria-label="갤러리"
+            >
+                <svg
+                    class="quick-nav__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                    <circle cx="9" cy="9.5" r="1.6"></circle>
+                    <path d="M21 16l-5-5-6 6"></path>
+                </svg>
+                <span class="quick-nav__label">갤러리</span>
+            </button>
+            <button
+                class="quick-nav__item"
+                type="button"
+                data-nav-target="calendarSection"
+                aria-label="예식 일정"
+            >
+                <svg
+                    class="quick-nav__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"></path>
+                </svg>
+                <span class="quick-nav__label">일정</span>
+            </button>
+            <button
+                class="quick-nav__item"
+                type="button"
+                data-nav-target="location"
+                aria-label="오시는 길"
+            >
+                <svg
+                    class="quick-nav__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M12 21s-7-6.3-7-11a7 7 0 1 1 14 0c0 4.7-7 11-7 11z"></path>
+                    <circle cx="12" cy="10" r="2.4"></circle>
+                </svg>
+                <span class="quick-nav__label">오시는 길</span>
+            </button>
+            <button
+                class="quick-nav__item"
+                type="button"
+                data-nav-target="account"
+                aria-label="마음 전하기"
+            >
+                <svg
+                    class="quick-nav__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M12 20s-7-4.6-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.4 12 20 12 20z"></path>
+                </svg>
+                <span class="quick-nav__label">마음</span>
+            </button>
+        </nav>
+
+        <script src="script.js"></script>
+    </body>
+</html>
