@@ -127,6 +127,33 @@
   }
 
   /* ═══════════════════════════════════════════
+     Image Save Protection (롱프레스 저장 방지)
+     ═══════════════════════════════════════════ */
+
+  // CSS(-webkit-touch-callout:none + 투명 실드)가 1차 방어,
+  // 아래 JS가 우클릭/드래그/롱프레스 메뉴를 2차로 차단합니다.
+  function initImageProtection() {
+    // 우클릭 / 롱프레스 메뉴 차단 (이미지 영역만)
+    document.addEventListener("contextmenu", (e) => {
+      if (e.target.closest("img, .gallery, .story, .hero, .photo-modal, .location__map")) {
+        e.preventDefault();
+      }
+    });
+
+    // 이미지 드래그 저장 차단
+    document.addEventListener("dragstart", (e) => {
+      if (e.target.tagName === "IMG") e.preventDefault();
+    });
+
+    // iOS Safari 롱프레스 콜아웃 억제 (선택 영역 생성 방지)
+    document.addEventListener("selectstart", (e) => {
+      if (e.target.closest("img, .gallery, .story, .hero, .photo-modal")) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  /* ═══════════════════════════════════════════
      Toast
      ═══════════════════════════════════════════ */
 
@@ -410,7 +437,10 @@
      ═══════════════════════════════════════════ */
 
   function initHero() {
-    $("#heroPhoto").src = "images/hero/1.jpg";
+    const heroPhoto = $("#heroPhoto");
+    heroPhoto.src = "images/hero/1.jpg";
+    heroPhoto.setAttribute("draggable", "false");
+    heroPhoto.addEventListener("contextmenu", (e) => e.preventDefault());
     $("#heroNames").textContent =
       `${CONFIG.groom.name}  ·  ${CONFIG.bride.name}`;
     $("#heroDate").textContent = formatDate(
@@ -606,7 +636,7 @@
       const div = document.createElement("div");
       div.className = "story__photo-item animate-item";
       div.setAttribute("data-animate", "fade-up");
-      div.innerHTML = `<img src="${src}" alt="스토리 사진 ${i + 1}" loading="lazy" decoding="async">`; 
+      div.innerHTML = `<img src="${src}" alt="스토리 사진 ${i + 1}" loading="lazy" decoding="async" draggable="false" oncontextmenu="return false">`; 
       container.appendChild(div);
     });
   }
@@ -630,7 +660,7 @@
       const div = document.createElement("div");
       div.className = "gallery__item animate-item";
       div.setAttribute("data-animate", "fade-up");
-      div.innerHTML = `<img src="${src}" alt="갤러리 사진 ${i + 1}" loading="lazy" decoding="async">`; 
+      div.innerHTML = `<img src="${src}" alt="갤러리 사진 ${i + 1}" loading="lazy" decoding="async" draggable="false" oncontextmenu="return false">`; 
       div.addEventListener("click", () => openPhotoModal(galleryImages, i));
       grid.appendChild(div);
     });
@@ -679,6 +709,10 @@
   }
 
   function initPhotoModal() {
+    const modalImg = $("#modalImg");
+    modalImg.addEventListener("contextmenu", (e) => e.preventDefault());
+    modalImg.addEventListener("dragstart", (e) => e.preventDefault());
+
     $("#modalClose").addEventListener("click", closePhotoModal);
     $("#modalPrev").addEventListener("click", () => modalNavigate(-1));
     $("#modalNext").addEventListener("click", () => modalNavigate(1));
@@ -746,6 +780,10 @@
     $("#locationAddress").textContent = w.address;
     $("#locationTel").textContent = w.tel ? `Tel. ${w.tel}` : "";
     $("#locationMapImg").src = "images/location/1.jpg";
+    $("#locationMapImg").setAttribute("draggable", "false");
+    $("#locationMapImg").addEventListener("contextmenu", (e) =>
+      e.preventDefault(),
+    );
     $("#kakaoMapBtn").href = w.mapLinks.kakao || "#";
     $("#naverMapBtn").href = w.mapLinks.naver || "#";
 
@@ -977,6 +1015,7 @@
   async function init() {
     setMetaTags();
     initZoomGuard();
+    initImageProtection();
     initCurtain();
     initBgm();
     initHero();
