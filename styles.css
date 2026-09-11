@@ -71,6 +71,11 @@ img {
     display: block;
     max-width: 100%;
     height: auto;
+    /* 롱프레스 저장 방지: 이미지 콜아웃/선택/드래그 차단 */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 button {
@@ -433,6 +438,8 @@ a {
     touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    position: relative;
 }
 
 .photo-modal__img {
@@ -443,6 +450,15 @@ a {
     user-select: none;
     -webkit-user-select: none;
     -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+}
+
+.location__map-img {
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .photo-modal__counter {
@@ -501,6 +517,18 @@ a {
 .hero__photo-wrap {
     width: 100%;
     overflow: hidden;
+    position: relative;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.hero__photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    z-index: 1;
 }
 
 .hero__photo {
@@ -508,6 +536,7 @@ a {
     aspect-ratio: 3 / 4;
     object-fit: cover;
     object-position: center 30%;
+    pointer-events: none;
 }
 
 .hero__content {
@@ -653,14 +682,27 @@ a {
 }
 
 .story__photo-item {
+    position: relative;
     overflow: hidden;
     cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.story__photo-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    z-index: 1;
 }
 
 .story__photo-item img {
     width: 100%;
     aspect-ratio: 2 / 3;
     object-fit: cover;
+    pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════
@@ -681,6 +723,19 @@ a {
     aspect-ratio: 1;
     overflow: hidden;
     cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* 투명 실드: 롱프레스 타깃이 img가 아닌 div가 되게 해서 저장 메뉴 차단.
+   클릭/탭은 부모 div로 버블링되므로 갤러리 열기는 그대로 동작. */
+.gallery__item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    z-index: 1;
 }
 
 .gallery__item img {
@@ -689,6 +744,7 @@ a {
     object-fit: cover;
     object-position: top;
     transition: opacity var(--transition);
+    pointer-events: none;
 }
 
 .gallery__item:hover img {
